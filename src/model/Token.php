@@ -3,66 +3,56 @@ require_once __DIR__ . '/../library/conexion.php';
 
 class Token {
 
+  // Obtener todos los tokens
   public static function all(): array {
-    $sql = "SELECT t.*, c.razon_social, c.ruc
-              FROM tokens t
-              JOIN client_api c ON c.id = t.id_client_api
-             ORDER BY t.id DESC";
-    return Conexion::getConexion()->query($sql)->fetchAll();
+    $sql = "SELECT id, tokens FROM tokens_api ORDER BY id DESC";
+    return Conexion::getConexion()->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  // Buscar un token por su ID
   public static function find(int $id): ?array {
-    $st = Conexion::getConexion()->prepare("
-      SELECT t.*, c.razon_social, c.ruc, c.telefono, c.correo
-        FROM tokens t
-        JOIN client_api c ON c.id = t.id_client_api
-       WHERE t.id = ? LIMIT 1
-    ");
+    $st = Conexion::getConexion()->prepare("SELECT * FROM tokens_api WHERE id = ? LIMIT 1");
     $st->execute([$id]);
-    $r = $st->fetch();
+    $r = $st->fetch(PDO::FETCH_ASSOC);
     return $r ?: null;
   }
 
-  public static function clients(): array {
-    $sql = "SELECT id, ruc, razon_social FROM client_api ORDER BY razon_social";
-    return Conexion::getConexion()->query($sql)->fetchAll();
-  }
-
+  // Crear un nuevo token
   public static function create(array $d): int {
     $st = Conexion::getConexion()->prepare("
-      INSERT INTO tokens (id_client_api, token, estado)
-      VALUES (?, ?, ?)
+      INSERT INTO tokens_api (tokens, fecha_creacion)
+      VALUES (?, NOW())
     ");
     $st->execute([
-      (int)$d['id_client_api'],
-      trim($d['token']),
-      trim($d['estado'] ?? 'Activo'),
+      trim($d['tokens']) // ahora usa 'tokens' correctamente
     ]);
     return (int) Conexion::getConexion()->lastInsertId();
   }
 
+  // Actualizar token existente
   public static function update(int $id, array $d): bool {
     $st = Conexion::getConexion()->prepare("
-      UPDATE tokens SET id_client_api=?, token=?, estado=? WHERE id=?
+      UPDATE tokens_api SET tokens=? WHERE id=?
     ");
     return $st->execute([
-      (int)$d['id_client_api'],
-      trim($d['token']),
-      trim($d['estado'] ?? 'Activo'),
+      trim($d['tokens']),
       $id
     ]);
   }
-  //nuevo
-  // Buscar token por su valor
+
+  // Buscar token por su valor (útil para autenticaciones)
   public static function findByToken(string $tokenValue): ?array {
-    $st = Conexion::getConexion()->prepare("
-      SELECT t.*, c.razon_social, c.ruc, c.estado as cliente_estado
-        FROM tokens t
-        JOIN client_api c ON c.id = t.id_client_api
-       WHERE t.token = ? LIMIT 1
-    ");
+    $st = Conexion::getConexion()->prepare("SELECT * FROM tokens_api WHERE tokens = ? LIMIT 1");
     $st->execute([trim($tokenValue)]);
-    $r = $st->fetch();
+    $r = $st->fetch(PDO::FETCH_ASSOC);
     return $r ?: null;
   }
+
+  // Eliminar token (opcional)
+  public static function delete(int $id): bool {
+    $st = Conexion::getConexion()->prepare("DELETE FROM tokens_api WHERE id = ?");
+    return $st->execute([$id]);
+  }
 }
+
+

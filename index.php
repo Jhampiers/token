@@ -7,12 +7,12 @@ $a = $_GET['a'] ?? 'loginForm';
 
 $controllers = [
     'auth'      => __DIR__ . '/src/control/AuthController.php',
-    'cancha'    => __DIR__ . '/src/control/CanchaController.php',
+    
     'dashboard' => __DIR__ . '/src/control/DashboardController.php',
     'usuario'   => __DIR__ . '/src/control/UsuarioController.php',
-    'clienteapi'=> __DIR__ . '/src/control/ClienteApiController.php',
+    
     'token'     => __DIR__ . '/src/control/TokenController.php', 
-    'consumoApi'     => __DIR__ . '/src/control/ConsumoApiController.php', 
+    
 
 ];
 
