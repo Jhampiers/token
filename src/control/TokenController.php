@@ -45,12 +45,15 @@ class TokenController
   public function update(){
     $this->requireAdmin();
     $id = (int)($_POST['id'] ?? 0);
-    if (empty($_POST['token'])) {
+
+    // 🔧 CAMBIO AQUÍ — usamos "tokens" porque así se llama en el formulario y en la BD
+    if (empty($_POST['tokens'])) {
       if (session_status() !== PHP_SESSION_ACTIVE) session_start();
       $_SESSION['error'] = 'El campo token es obligatorio';
       header('Location: ' . BASE_URL . '?c=token&a=edit&id=' . $id);
       exit;
     }
+
     Token::update($id, $_POST);
     header('Location: ' . BASE_URL . '?c=token&a=index');
   }

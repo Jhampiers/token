@@ -24,8 +24,9 @@
       <input type="hidden" name="id" value="<?= (int)$token['id'] ?>">
 
       <div>
-        <label>Token *</label>
-        <input id="tokVal" name="tokens" required value="<?= htmlspecialchars($token['tokens'] ?? '') ?>">
+        <label for="tokVal">Token *</label>
+        <input id="tokVal" name="tokens" type="text" required 
+               value="<?= htmlspecialchars($token['tokens'] ?? '') ?>">
       </div>
 
       <div class="actions">
@@ -37,5 +38,6 @@
 </div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>
+
 
 
