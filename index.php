@@ -12,7 +12,7 @@ $controllers = [
     'usuario'   => __DIR__ . '/src/control/UsuarioController.php',
     
     'token'     => __DIR__ . '/src/control/TokenController.php', 
-    
+    'consumoApi'     => __DIR__ . '/src/control/ConsumoApiController.php', 
 
 ];
 

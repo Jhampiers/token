@@ -93,6 +93,13 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
     <i class="fa-solid fa-key"></i> <span>Tokens</span>
   </a>
 <?php endif; ?>
+
+<?php if (!empty($_SESSION['user'])): ?>
+  <a href="<?= BASE_URL ?>?c=consumoApi&a=vistaTest" class="<?= (($_GET['c'] ?? '')==='consumoApi')?'active':'' ?>">
+    <i class="fa-solid fa-vial"></i> <span>Consumo API</span>
+  </a>
+<?php endif; ?>
+
 <?php if (!empty($_SESSION['user'])): ?>
   
 <?php endif; ?>
