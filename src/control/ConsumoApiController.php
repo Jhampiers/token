@@ -13,45 +13,58 @@ class ConsumoApiController
     {
         // Configurar headers para JSON
         header('Content-Type: application/json; charset=utf-8');
-        
-        // 1. VALIDAR MÉTODO HTTP
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: POST, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type");
+
+        // Permitir solicitudes OPTIONS (preflight)
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            http_response_code(200);
+            exit;
+        }
+
+        // 1️⃣ VALIDAR MÉTODO HTTP
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->responderError('Método no permitido. Use POST', 405);
             return;
         }
 
-        // 2. OBTENER DATOS DE LA PETICIÓN
-        $tipo = $_POST['tipo'] ?? '';
-        $token = $_POST['token'] ?? '';
-        $data = $_POST['data'] ?? '';
+        // 2️⃣ LEER DATOS DEL CUERPO (POST)
+        $input = file_get_contents("php://input");
+        $dataInput = json_decode($input, true);
 
-        // 3. VALIDAR QUE SE ENVIÓ UN TOKEN
+        // Si viene vacío, intentar con $_POST (por formularios normales)
+        if (!$dataInput) {
+            $dataInput = $_POST;
+        }
+
+        $tipo = $dataInput['tipo'] ?? '';
+        $token = $dataInput['token'] ?? '';
+        $data = $dataInput['data'] ?? '';
+
+        // 3️⃣ VALIDAR TOKEN
         if (empty($token)) {
             $this->responderError('Token no proporcionado', 401);
             return;
         }
 
-        // 4. VALIDAR TOKEN EN BASE DE DATOS
         $tokenData = Token::findByToken($token);
-        
         if (!$tokenData) {
             $this->responderError('Token inválido', 401);
             return;
         }
 
-        // 5. VERIFICAR QUE EL TOKEN ESTÉ ACTIVO
         if ($tokenData['estado'] !== 'Activo') {
             $this->responderError('Token inactivo', 401);
             return;
         }
 
-        // 6. VERIFICAR QUE EL CLIENTE API ESTÉ ACTIVO
         if ($tokenData['cliente_estado'] !== 'Activo') {
             $this->responderError('Cliente API no está activo', 403);
             return;
         }
 
-        // 7. PROCESAR LA PETICIÓN SEGÚN EL TIPO
+        // 4️⃣ PROCESAR PETICIÓN SEGÚN EL TIPO
         switch ($tipo) {
             case 'buscar_cancha_nombre':
                 $this->buscarCanchaPorNombre($data, $tokenData);
@@ -85,7 +98,6 @@ class ConsumoApiController
         }
 
         $canchas = ClienteApi::buscarCanchasPorNombre($nombre);
-        
         $this->responderExito([
             'cliente' => $tokenData['razon_social'],
             'total' => count($canchas),
@@ -104,7 +116,6 @@ class ConsumoApiController
         }
 
         $canchas = ClienteApi::buscarCanchasPorUbicacion($ubicacion);
-        
         $this->responderExito([
             'cliente' => $tokenData['razon_social'],
             'total' => count($canchas),
@@ -118,7 +129,6 @@ class ConsumoApiController
     private function listarCanchas($tokenData)
     {
         $canchas = Cancha::all();
-        
         $this->responderExito([
             'cliente' => $tokenData['razon_social'],
             'total' => count($canchas),
@@ -127,15 +137,13 @@ class ConsumoApiController
     }
 
     /**
-     * Listar solo canchas disponibles
+     * Listar canchas disponibles
      */
     private function listarCanchasDisponibles($tokenData)
     {
         $todasCanchas = Cancha::all();
-        $disponibles = array_filter($todasCanchas, function($cancha) {
-            return $cancha['estado'] === 'Disponible';
-        });
-        
+        $disponibles = array_filter($todasCanchas, fn($c) => $c['estado'] === 'Disponible');
+
         $this->responderExito([
             'cliente' => $tokenData['razon_social'],
             'total' => count($disponibles),
@@ -169,32 +177,15 @@ class ConsumoApiController
     }
 
     /**
-     * Vista de prueba en el dashboard (solo para pruebas)
+     * Vista pública para probar la API
      */
-    /** public function vistaTest()
+    public function vistaTest()
     {
-        // Verificar autenticación
-        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-        if (empty($_SESSION['user'])) {
-            header('Location: ' . BASE_URL . '?c=auth&a=loginForm'); 
-            exit;
-        }
-
-        // Obtener todos los tokens activos para el formulario
-        $tokens = Token::all();
-        
-        require __DIR__ . '/../view/consumoapi/test.php';
-    }  */
-public function vistaTest()
-    {
-        //  Ya no pedimos login ni sesión
+        // Sin sesión ni login
         $tokens = Token::all();
 
-        // Usa tu header y footer propios
         require __DIR__ . '/../view/consumoapi/header_test.php';
         require __DIR__ . '/../view/consumoapi/test.php';
         require __DIR__ . '/../view/consumoapi/footer_test.php';
     }
-    
-
 }
