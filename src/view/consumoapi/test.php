@@ -147,10 +147,12 @@ document.getElementById('formTestAPI').addEventListener('submit', async function
   resultado.innerHTML = '';
 
   try {
-    const response = await fetch(`${ruta_api}?c=consumoApi&a=procesar`, {
-      method: 'POST',
-      body: formData
-    });
+   // 🔹 Ahora apunta a tu propio controlador del sistema TOKEN
+const response = await fetch(`?c=consumoApi&a=consumir`, {
+  method: 'POST',
+  body: formData
+});
+
 
     const data = await response.json();
 
