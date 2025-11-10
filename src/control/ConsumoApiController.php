@@ -1,8 +1,5 @@
 <?php
 require_once __DIR__ . '/../model/Token.php';
-require_once __DIR__ . '/../model/ClienteApi.php';
-require_once __DIR__ . '/../model/Cancha.php';
-
 class ConsumoApiController
 {
     /**
