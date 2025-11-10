@@ -22,14 +22,16 @@
     <div class="card-body px-4 py-4">
       <form id="formTestAPI" class="row g-3 align-items-end" method="POST">
 
-        <!-- Token -->
+        <!-- TOKEN DE AUTORIZACIÓN -->
         <input type="hidden" id="token" name="token"
                value="tok_38a51afa73011df642e1cb75baaa3a92-7">
 
-        <!-- URL base de la API -->
-        <input type="hidden" id="ruta_api" value="https://canchasdeportivas.serviciosvirtuales.com.pe/">
+        <!-- URL BASE DE LA API PRINCIPAL -->
+        <input type="hidden" id="ruta_api" name="ruta_api" 
+  value="https://canchasdeportivas.serviciosvirtuales.com.pe/?c=consumoApi&a=procesar">
 
-        <!-- Tipo de búsqueda -->
+
+        <!-- TIPO DE CONSULTA -->
         <div class="col-md-5">
           <label for="tipo" class="form-label fw-semibold">Tipo de búsqueda</label>
           <select class="form-select border-primary shadow-sm" id="tipo" name="tipo" required>
@@ -41,7 +43,7 @@
           </select>
         </div>
 
-        <!-- Campo de búsqueda -->
+        <!-- DATO DE BÚSQUEDA -->
         <div class="col-md-5" id="divData" style="display: none;">
           <label for="data" class="form-label fw-semibold">Dato de búsqueda</label>
           <div class="input-group shadow-sm">
@@ -54,7 +56,7 @@
           <small class="text-muted">Solo necesario para búsquedas específicas.</small>
         </div>
 
-        <!-- Botones -->
+        <!-- BOTONES -->
         <div class="col-md-2 text-center">
           <button type="submit" class="btn btn-primary w-100 shadow-sm">
             <i class="fas fa-magnifying-glass me-1"></i> Buscar
@@ -88,24 +90,11 @@
 
 <!-- ESTILOS -->
 <style>
-  body {
-    background: #f8f9fa;
-  }
-  table {
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  td, th {
-    vertical-align: middle;
-  }
-  .estado-disponible {
-    color: #198754;
-    font-weight: bold;
-  }
-  .estado-ocupado {
-    color: #dc3545;
-    font-weight: bold;
-  }
+  body { background: #f8f9fa; }
+  table { border-radius: 8px; overflow: hidden; }
+  td, th { vertical-align: middle; }
+  .estado-disponible { color: #198754; font-weight: bold; }
+  .estado-ocupado { color: #dc3545; font-weight: bold; }
   .dataTables_wrapper .dataTables_paginate .paginate_button {
     border-radius: 50% !important;
     margin: 0 3px;
@@ -141,18 +130,17 @@ document.getElementById('formTestAPI').addEventListener('submit', async function
   const loading = document.getElementById('loading');
   const resultado = document.getElementById('resultado');
   const formData = new FormData(this);
-  const ruta_api = document.getElementById('ruta_api').value; // 🔹 URL base dinámica
+  const ruta_api = document.getElementById('ruta_api').value;
 
   loading.style.display = 'block';
   resultado.innerHTML = '';
 
   try {
-   // 🔹 Ahora apunta a tu propio controlador del sistema TOKEN
-const response = await fetch(`?c=consumoApi&a=consumir`, {
-  method: 'POST',
-  body: formData
-});
-
+    // ✅ Llama al controlador de tu NUEVO sistema (token / cliente)
+    const response = await fetch(`?c=consumoApi&a=consumir`, {
+      method: 'POST',
+      body: formData
+    });
 
     const data = await response.json();
 
@@ -194,7 +182,7 @@ const response = await fetch(`?c=consumoApi&a=consumir`, {
 
       // Inicializar DataTable
       setTimeout(() => {
-        const table = $('#tablaCanchas').DataTable({
+        $('#tablaCanchas').DataTable({
           pageLength: 5,
           lengthChange: false,
           ordering: true,
@@ -202,10 +190,7 @@ const response = await fetch(`?c=consumoApi&a=consumir`, {
           language: {
             search: "Buscar:",
             paginate: {
-              first: "Primero",
-              last: "Último",
-              next: "Siguiente",
-              previous: "Anterior"
+              first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior"
             },
             info: "Mostrando _START_ a _END_ de _TOTAL_ resultados",
             infoEmpty: "No hay registros disponibles",
@@ -221,10 +206,10 @@ const response = await fetch(`?c=consumoApi&a=consumir`, {
         });
       }, 200);
     } else {
-      resultado.innerHTML = '<div class="alert alert-warning">No se encontraron resultados.</div>';
+      resultado.innerHTML = `<div class="alert alert-warning">${data.mensaje || 'No se encontraron resultados.'}</div>`;
     }
   } catch (error) {
-    resultado.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+    resultado.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
   } finally {
     loading.style.display = 'none';
   }
@@ -242,6 +227,7 @@ document.getElementById('btnLimpiar').addEventListener('click', function() {
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 
 
 

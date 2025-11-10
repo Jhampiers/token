@@ -1,76 +1,74 @@
 <?php
-require_once __DIR__ . '/../model/Token.php';
-
 class ConsumoApiController
 {
     /**
-     * Muestra la vista de prueba del consumo de la API
+     * Muestra la vista del test
      */
     public function vistaTest()
     {
-        // No requiere login
-        $tokens = Token::all();
-
         require __DIR__ . '/../view/consumoapi/header_test.php';
         require __DIR__ . '/../view/consumoapi/test.php';
         require __DIR__ . '/../view/consumoapi/footer_test.php';
     }
 
     /**
-     * Envía una solicitud al sistema principal (API real)
+     * Método que envía los datos al API principal y devuelve la respuesta
      */
     public function consumir()
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        // 1️⃣ Validar que se envió por POST
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['status' => false, 'mensaje' => 'Método no permitido. Use POST']);
-            return;
-        }
-
-        // 2️⃣ Obtener datos del formulario
-        $tipo  = $_POST['tipo'] ?? '';
+        // Obtener datos enviados por el formulario
+        $tipo = $_POST['tipo'] ?? '';
         $token = $_POST['token'] ?? '';
-        $data  = $_POST['data'] ?? '';
+        $data = $_POST['data'] ?? '';
+        $ruta_api = $_POST['ruta_api'] ?? '';
 
-        if (empty($tipo) || empty($token)) {
-            echo json_encode(['status' => false, 'mensaje' => 'Debe seleccionar tipo y token']);
+        // Validar que haya una ruta
+        if (empty($ruta_api)) {
+            echo json_encode(['status' => false, 'mensaje' => 'No se especificó la ruta del API']);
             return;
         }
 
-        // 3️⃣ Preparar la URL del sistema principal (API real)
-        $url_api = "https://canchasdeportivas.serviciosvirtuales.com.pe/?c=consumoapi&a=procesar";
-
-        // 4️⃣ Preparar datos a enviar
-        $payload = [
-            'tipo'  => $tipo,
+        // Preparar datos para enviar al API principal
+        $postData = [
+            'tipo' => $tipo,
             'token' => $token,
-            'data'  => $data
+            'data' => $data
         ];
 
-        // 5️⃣ Enviar solicitud usando cURL
-        $ch = curl_init($url_api);
+        // Enviar al API principal usando cURL
+        $ch = curl_init($ruta_api);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Accept: application/json'
-        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // por si usa HTTPS sin certificado válido
 
         $response = curl_exec($ch);
         $error = curl_error($ch);
         curl_close($ch);
 
-        // 6️⃣ Validar respuesta
+        // Si hay error de conexión
         if ($error) {
-            echo json_encode(['status' => false, 'mensaje' => 'Error al conectar con la API: ' . $error]);
+            echo json_encode(['status' => false, 'mensaje' => 'Error al conectar con el API: ' . $error]);
             return;
         }
 
-        // 7️⃣ Mostrar respuesta JSON de la API real
-        echo $response;
+        // Intentar decodificar la respuesta del API principal
+        $jsonData = json_decode($response, true);
+
+        // Si no se puede decodificar, entonces el API devolvió HTML o texto
+        if ($jsonData === null) {
+            echo json_encode([
+                'status' => false,
+                'mensaje' => 'La respuesta del API no es un JSON válido',
+                'respuesta_raw' => $response
+            ]);
+            return;
+        }
+
+        // Devolver tal cual el JSON que vino del API principal
+        echo json_encode($jsonData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 }
 
