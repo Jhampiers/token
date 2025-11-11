@@ -225,7 +225,7 @@ document.getElementById('formTestAPI').addEventListener('submit', async function
         Swal.fire({
   icon: 'error',
   title: 'Token inválido o expirado',
-  text: 'Por favor actualiza el token en el sistema y vuelve a intentarlo.',
+  text: 'actualiza el token y vuelve a intentarlo.',
   confirmButtonColor: '#d33',
   confirmButtonText: 'Entendido'
 });
