@@ -222,7 +222,14 @@ document.getElementById('formTestAPI').addEventListener('submit', async function
     } else {
       const mensaje = data.mensaje || 'No se encontraron resultados.';
       if (mensaje.toLowerCase().includes("token")) {
-        resultado.innerHTML = `<div class="alert alert-danger"><strong>Error:</strong> Token no válido o expirado.</div>`;
+        Swal.fire({
+  icon: 'error',
+  title: 'Token inválido o expirado',
+  text: 'Por favor actualiza el token en el sistema y vuelve a intentarlo.',
+  confirmButtonColor: '#d33',
+  confirmButtonText: 'Entendido'
+});
+
       } else {
         resultado.innerHTML = `<div class="alert alert-warning">${mensaje}</div>`;
       }
@@ -246,6 +253,8 @@ document.getElementById('btnLimpiar').addEventListener('click', function() {
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 
 
