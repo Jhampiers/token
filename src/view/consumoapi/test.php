@@ -1,3 +1,12 @@
+<?php
+require_once __DIR__ . '/../../library/conexion.php';
+require_once __DIR__ . '/../../model/Token.php';
+
+// Obtener el último token guardado
+$ultimoToken = Token::all();
+$tokenValue = $ultimoToken && count($ultimoToken) > 0 ? $ultimoToken[0]['tokens'] : '';
+?>
+
 <div class="container py-5" style="max-width: 1200px;">
   <!-- TÍTULO -->
   <div class="text-center mb-5">
@@ -22,14 +31,12 @@
     <div class="card-body px-4 py-4">
       <form id="formTestAPI" class="row g-3 align-items-end" method="POST">
 
-        <!-- TOKEN DE AUTORIZACIÓN -->
-        <input type="hidden" id="token" name="token"
-               value="tok_38a51afa73011df642e1cb75baaa3a92-7">
+        <!-- TOKEN AUTOMÁTICO DESDE BASE DE DATOS -->
+        <input type="hidden" id="token" name="token" value="<?php echo htmlspecialchars($tokenValue); ?>">
 
         <!-- URL BASE DE LA API PRINCIPAL -->
         <input type="hidden" id="ruta_api" name="ruta_api" 
-  value="https://canchasdeportivas.serviciosvirtuales.com.pe/?c=consumoApi&a=procesar">
-
+               value="https://canchasdeportivas.serviciosvirtuales.com.pe/?c=consumoApi&a=procesar">
 
         <!-- TIPO DE CONSULTA -->
         <div class="col-md-5">
@@ -239,6 +246,7 @@ document.getElementById('btnLimpiar').addEventListener('click', function() {
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 
 
 
