@@ -136,11 +136,18 @@ document.getElementById('formTestAPI').addEventListener('submit', async function
   resultado.innerHTML = '';
 
   try {
-    // ✅ Llama al controlador de tu NUEVO sistema (token / cliente)
     const response = await fetch(`?c=consumoApi&a=consumir`, {
       method: 'POST',
       body: formData
     });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("Token no válido o expirado");
+      } else {
+        throw new Error(`Error del servidor (${response.status})`);
+      }
+    }
 
     const data = await response.json();
 
@@ -206,10 +213,15 @@ document.getElementById('formTestAPI').addEventListener('submit', async function
         });
       }, 200);
     } else {
-      resultado.innerHTML = `<div class="alert alert-warning">${data.mensaje || 'No se encontraron resultados.'}</div>`;
+      const mensaje = data.mensaje || 'No se encontraron resultados.';
+      if (mensaje.toLowerCase().includes("token")) {
+        resultado.innerHTML = `<div class="alert alert-danger"><strong>Error:</strong> Token no válido o expirado.</div>`;
+      } else {
+        resultado.innerHTML = `<div class="alert alert-warning">${mensaje}</div>`;
+      }
     }
   } catch (error) {
-    resultado.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    resultado.innerHTML = `<div class="alert alert-danger">⚠️ ${error.message}</div>`;
   } finally {
     loading.style.display = 'none';
   }
@@ -227,6 +239,7 @@ document.getElementById('btnLimpiar').addEventListener('click', function() {
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 
 
 
